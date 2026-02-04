@@ -1,10 +1,13 @@
-// DATA UPDATE LOGIC
+// ═══════════════════════════════════════════════════════════════════════════
+// CENTRALE DE MESURE - DATA UPDATE LOGIC
+// ═══════════════════════════════════════════════════════════════════════════
 // - fetchMeasurements() returns mock data now
 // - Replace API_URL with your real backend endpoint later
 
 const API_URL = "https://api.placeholder.local/measurements"; // TODO: replace with real REST API URL
 const REFRESH_MS = 3000;
 
+// DOM Elements
 const elements = {
   voltage: document.getElementById("voltageValue"),
   current: document.getElementById("currentValue"),
@@ -14,20 +17,28 @@ const elements = {
   frequency: document.getElementById("frequencyValue"),
   powerFactor: document.getElementById("powerFactorValue"),
   lastUpdate: document.getElementById("lastUpdate"),
+  pfFill: document.getElementById("pfFill"),
 };
 
+// Chart Configuration
 const chartCtx = document.getElementById("powerChart").getContext("2d");
+
 const chartData = {
   labels: [],
   datasets: [
     {
       label: "Active Power (kW)",
       data: [],
-      borderColor: "#5ad1ff",
-      backgroundColor: "rgba(90, 209, 255, 0.15)",
-      tension: 0.3,
+      borderColor: "#3b82f6",
+      backgroundColor: "rgba(59, 130, 246, 0.1)",
+      tension: 0.4,
       fill: true,
-      pointRadius: 2,
+      pointRadius: 0,
+      pointHoverRadius: 4,
+      pointHoverBackgroundColor: "#3b82f6",
+      pointHoverBorderColor: "#ffffff",
+      pointHoverBorderWidth: 2,
+      borderWidth: 2,
     },
   ],
 };
@@ -38,24 +49,93 @@ const powerChart = new Chart(chartCtx, {
   options: {
     responsive: true,
     maintainAspectRatio: false,
+    interaction: {
+      mode: "index",
+      intersect: false,
+    },
     scales: {
       x: {
-        grid: { color: "rgba(255,255,255,0.05)" },
-        ticks: { color: "#9fb0c5" },
+        grid: {
+          color: "rgba(255, 255, 255, 0.05)",
+          drawBorder: false,
+        },
+        ticks: {
+          color: "#737373",
+          font: {
+            family: "'Inter', sans-serif",
+            size: 11,
+          },
+          maxRotation: 0,
+          maxTicksLimit: 8,
+        },
+        border: {
+          display: false,
+        },
       },
       y: {
-        grid: { color: "rgba(255,255,255,0.08)" },
-        ticks: { color: "#9fb0c5" },
-        title: { display: true, text: "kW", color: "#9fb0c5" },
+        grid: {
+          color: "rgba(255, 255, 255, 0.05)",
+          drawBorder: false,
+        },
+        ticks: {
+          color: "#737373",
+          font: {
+            family: "'Inter', sans-serif",
+            size: 11,
+          },
+          padding: 8,
+        },
+        border: {
+          display: false,
+        },
+        title: {
+          display: true,
+          text: "Power (kW)",
+          color: "#737373",
+          font: {
+            family: "'Inter', sans-serif",
+            size: 12,
+            weight: "500",
+          },
+        },
       },
     },
     plugins: {
-      legend: { labels: { color: "#e6eef7" } },
-      tooltip: { mode: "index", intersect: false },
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        backgroundColor: "#1a1a1a",
+        titleColor: "#fafafa",
+        bodyColor: "#a1a1a1",
+        borderColor: "#262626",
+        borderWidth: 1,
+        padding: 12,
+        cornerRadius: 8,
+        titleFont: {
+          family: "'Inter', sans-serif",
+          size: 13,
+          weight: "600",
+        },
+        bodyFont: {
+          family: "'JetBrains Mono', monospace",
+          size: 12,
+        },
+        displayColors: false,
+        callbacks: {
+          title: function (context) {
+            return "Time: " + context[0].label;
+          },
+          label: function (context) {
+            return context.parsed.y.toFixed(2) + " kW";
+          },
+        },
+      },
     },
   },
 });
 
+// Utility Functions
 function formatNumber(value, decimals = 2) {
   return Number(value).toFixed(decimals);
 }
@@ -88,35 +168,76 @@ async function fetchMeasurements() {
   };
 }
 
+// Update UI with new measurements
 function updateUI(data) {
-  elements.voltage.textContent = formatNumber(data.voltage, 1);
-  elements.current.textContent = formatNumber(data.current, 1);
-  elements.activePower.textContent = formatNumber(data.activePower, 2);
-  elements.reactivePower.textContent = formatNumber(data.reactivePower, 2);
-  elements.energy.textContent = formatNumber(data.energy, 1);
-  elements.frequency.textContent = formatNumber(data.frequency, 1);
-  elements.powerFactor.textContent = formatNumber(data.powerFactor, 2);
+  // Update metric values with animation
+  animateValue(elements.voltage, formatNumber(data.voltage, 1));
+  animateValue(elements.current, formatNumber(data.current, 1));
+  animateValue(elements.activePower, formatNumber(data.activePower, 2));
+  animateValue(elements.reactivePower, formatNumber(data.reactivePower, 2));
+  animateValue(elements.energy, formatNumber(data.energy, 1));
+  animateValue(elements.frequency, formatNumber(data.frequency, 1));
+  animateValue(elements.powerFactor, formatNumber(data.powerFactor, 2));
 
-  const timeLabel = new Date(data.timestamp).toLocaleTimeString();
+  // Update power factor bar
+  const pfPercentage = Math.min(Math.max(data.powerFactor * 100, 0), 100);
+  if (elements.pfFill) {
+    elements.pfFill.style.width = pfPercentage + "%";
+  }
+
+  // Update timestamp
+  const timeLabel = new Date(data.timestamp).toLocaleTimeString("en-US", {
+    hour12: false,
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
   elements.lastUpdate.textContent = timeLabel;
 
   // Update chart
   chartData.labels.push(timeLabel);
   chartData.datasets[0].data.push(data.activePower);
 
+  // Keep only last 20 data points
   if (chartData.labels.length > 20) {
     chartData.labels.shift();
     chartData.datasets[0].data.shift();
   }
 
-  powerChart.update();
+  powerChart.update("none"); // Use 'none' mode for smoother updates
 }
 
+// Animate value changes
+function animateValue(element, newValue) {
+  if (!element) return;
+  
+  const currentValue = element.textContent;
+  if (currentValue !== newValue) {
+    element.style.transition = "opacity 0.15s ease";
+    element.style.opacity = "0.5";
+    
+    setTimeout(() => {
+      element.textContent = newValue;
+      element.style.opacity = "1";
+    }, 150);
+  }
+}
+
+// Main refresh function
 async function refresh() {
-  const data = await fetchMeasurements();
-  updateUI(data);
+  try {
+    const data = await fetchMeasurements();
+    updateUI(data);
+  } catch (error) {
+    console.error("Failed to fetch measurements:", error);
+  }
 }
 
-// Initial load + auto-refresh every 3 seconds
-refresh();
-setInterval(refresh, REFRESH_MS);
+// Initialize
+document.addEventListener("DOMContentLoaded", () => {
+  // Initial load
+  refresh();
+  
+  // Auto-refresh every 3 seconds
+  setInterval(refresh, REFRESH_MS);
+});
