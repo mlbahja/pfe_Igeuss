@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Centrale de Mesure Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;600&family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!--
+    UI STRUCTURE
+    - Top status bar with plant info and clock
+    - Main grid: measurement cards + chart panel
+  -->
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        <div>
+          <div class="title">Centrale de Mesure</div>
+          <div class="subtitle">Industrial Monitoring Console</div>
+        </div>
+      </div>
+      <div class="status">
+        <div class="status-item">
+          <span class="label">Status</span>
+          <span class="value ok">Online</span>
+        </div>
+        <div class="status-item">
+          <span class="label">Last Update</span>
+          <span class="value" id="lastUpdate">--:--:--</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="cards">
+        <!-- Measurement Cards: values updated by script.js -->
+        <div class="card" data-key="voltage">
+          <div class="card-head">
+            <span class="card-title">Voltage</span>
+            <span class="card-unit">V</span>
+          </div>
+          <div class="card-value" id="voltageValue">--</div>
+        </div>
+
+        <div class="card" data-key="current">
+          <div class="card-head">
+            <span class="card-title">Current</span>
+            <span class="card-unit">A</span>
+          </div>
+          <div class="card-value" id="currentValue">--</div>
+        </div>
+
+        <div class="card" data-key="activePower">
+          <div class="card-head">
+            <span class="card-title">Active Power</span>
+            <span class="card-unit">kW</span>
+          </div>
+          <div class="card-value" id="activePowerValue">--</div>
+        </div>
+
+        <div class="card" data-key="reactivePower">
+          <div class="card-head">
+            <span class="card-title">Reactive Power</span>
+            <span class="card-unit">kVAR</span>
+          </div>
+          <div class="card-value" id="reactivePowerValue">--</div>
+        </div>
+
+        <div class="card" data-key="energy">
+          <div class="card-head">
+            <span class="card-title">Energy</span>
+            <span class="card-unit">kWh</span>
+          </div>
+          <div class="card-value" id="energyValue">--</div>
+        </div>
+
+        <div class="card" data-key="frequency">
+          <div class="card-head">
+            <span class="card-title">Frequency</span>
+            <span class="card-unit">Hz</span>
+          </div>
+          <div class="card-value" id="frequencyValue">--</div>
+        </div>
+
+        <div class="card" data-key="powerFactor">
+          <div class="card-head">
+            <span class="card-title">Power Factor</span>
+            <span class="card-unit">PF</span>
+          </div>
+          <div class="card-value" id="powerFactorValue">--</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Active Power Trend</h2>
+          <span class="panel-sub">kW vs Time</span>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="powerChart"></canvas>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
