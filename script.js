@@ -1,10 +1,12 @@
-// ═══════════════════════════════════════════════════════════════════════════
-// CENTRALE DE MESURE - DATA UPDATE LOGIC
-// ═══════════════════════════════════════════════════════════════════════════
-// - fetchMeasurements() returns mock data now
-// - Replace API_URL with your real backend endpoint later
+// ============================================================================
+// CENTRALE DE MESURE - REAL-TIME DATA UPDATE LOGIC
+// ============================================================================
+// - WebSocket for real-time updates from Node backend
+// - Mock simulation still works until devices are connected
+// - Replace WS_URL / API_URL when backend is deployed
 
-const API_URL = "https://api.placeholder.local/measurements"; // TODO: replace with real REST API URL
+const WS_URL = "ws://localhost:3000"; // TODO: replace with your real WebSocket server
+const API_URL = "http://localhost:3000/api/measurements/latest"; // Optional HTTP fallback
 const REFRESH_MS = 3000;
 
 // DOM Elements
@@ -140,10 +142,8 @@ function formatNumber(value, decimals = 2) {
   return Number(value).toFixed(decimals);
 }
 
-// MOCK FETCH
-// Later: replace the mock body with a real fetch(API_URL) call.
-async function fetchMeasurements() {
-  // Simulate variability for demo purposes
+// MOCK FETCH (simulation until devices are connected)
+async function fetchMeasurementsMock() {
   const base = {
     voltage: 230.5,
     current: 10.2,
@@ -168,9 +168,17 @@ async function fetchMeasurements() {
   };
 }
 
+// Optional HTTP fallback (if you want polling instead of WebSocket)
+async function fetchMeasurementsFromAPI() {
+  const res = await fetch(API_URL);
+  if (!res.ok) {
+    throw new Error("API not ready");
+  }
+  return res.json();
+}
+
 // Update UI with new measurements
 function updateUI(data) {
-  // Update metric values with animation
   animateValue(elements.voltage, formatNumber(data.voltage, 1));
   animateValue(elements.current, formatNumber(data.current, 1));
   animateValue(elements.activePower, formatNumber(data.activePower, 2));
@@ -179,13 +187,11 @@ function updateUI(data) {
   animateValue(elements.frequency, formatNumber(data.frequency, 1));
   animateValue(elements.powerFactor, formatNumber(data.powerFactor, 2));
 
-  // Update power factor bar
   const pfPercentage = Math.min(Math.max(data.powerFactor * 100, 0), 100);
   if (elements.pfFill) {
     elements.pfFill.style.width = pfPercentage + "%";
   }
 
-  // Update timestamp
   const timeLabel = new Date(data.timestamp).toLocaleTimeString("en-US", {
     hour12: false,
     hour: "2-digit",
@@ -194,28 +200,26 @@ function updateUI(data) {
   });
   elements.lastUpdate.textContent = timeLabel;
 
-  // Update chart
   chartData.labels.push(timeLabel);
   chartData.datasets[0].data.push(data.activePower);
 
-  // Keep only last 20 data points
   if (chartData.labels.length > 20) {
     chartData.labels.shift();
     chartData.datasets[0].data.shift();
   }
 
-  powerChart.update("none"); // Use 'none' mode for smoother updates
+  powerChart.update("none");
 }
 
 // Animate value changes
 function animateValue(element, newValue) {
   if (!element) return;
-  
+
   const currentValue = element.textContent;
   if (currentValue !== newValue) {
     element.style.transition = "opacity 0.15s ease";
     element.style.opacity = "0.5";
-    
+
     setTimeout(() => {
       element.textContent = newValue;
       element.style.opacity = "1";
@@ -223,21 +227,72 @@ function animateValue(element, newValue) {
   }
 }
 
-// Main refresh function
-async function refresh() {
-  try {
-    const data = await fetchMeasurements();
-    updateUI(data);
-  } catch (error) {
-    console.error("Failed to fetch measurements:", error);
-  }
+let ws;
+let wsConnected = false;
+let mockIntervalId = null;
+let reconnectTimer = null;
+
+function startMockPolling() {
+  if (mockIntervalId) return;
+  const tick = async () => {
+    try {
+      const data = await fetchMeasurementsMock();
+      updateUI(data);
+    } catch (error) {
+      console.error("Mock refresh failed:", error);
+    }
+  };
+  tick();
+  mockIntervalId = setInterval(tick, REFRESH_MS);
+}
+
+function stopMockPolling() {
+  if (!mockIntervalId) return;
+  clearInterval(mockIntervalId);
+  mockIntervalId = null;
+}
+
+function connectWebSocket() {
+  if (ws) ws.close();
+
+  ws = new WebSocket(WS_URL);
+
+  ws.onopen = () => {
+    wsConnected = true;
+    stopMockPolling();
+    console.log("WebSocket connected");
+  };
+
+  ws.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      updateUI(data);
+    } catch (error) {
+      console.error("Invalid WebSocket payload", error);
+    }
+  };
+
+  ws.onerror = () => {
+    wsConnected = false;
+    startMockPolling();
+  };
+
+  ws.onclose = () => {
+    wsConnected = false;
+    startMockPolling();
+    if (!reconnectTimer) {
+      reconnectTimer = setTimeout(() => {
+        reconnectTimer = null;
+        connectWebSocket();
+      }, 3000);
+    }
+  };
 }
 
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
-  // Initial load
-  refresh();
-  
-  // Auto-refresh every 3 seconds
-  setInterval(refresh, REFRESH_MS);
+  // Start mock simulation immediately
+  startMockPolling();
+  // Try to connect to WebSocket backend
+  connectWebSocket();
 });

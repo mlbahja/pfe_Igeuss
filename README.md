@@ -134,3 +134,83 @@ EXPECTED RESULT
 - Easy switch from simulation to real hardware for soutenance demonstration
 
 
+
+========================================
+NODE BACKEND + WEBSOCKET (REAL-TIME)
+========================================
+
+This project includes a simple Node.js backend with:
+- REST endpoint for devices to push measurements
+- WebSocket broadcast for real-time dashboard updates
+- Optional HTTP fallback to fetch the latest value
+
+Files:
+- server.js
+- package.json
+
+Run the backend:
+  npm install
+  npm start
+
+By default it runs on:
+  http://localhost:3000
+
+Endpoints:
+- POST /api/measurements          (device pushes data here)
+- GET  /api/measurements/latest   (dashboard fallback)
+- WebSocket ws://localhost:3000   (real-time stream)
+
+The frontend (script.js) will:
+- Try WebSocket first for real-time updates
+- If WebSocket is not available, keep using mock simulation
+
+----------------------------------------
+ESP32 PUSH EXAMPLE (HTTP REST)
+----------------------------------------
+
+Use this Arduino sketch on ESP32 to push data every 3 seconds:
+
+  #include <WiFi.h>
+  #include <HTTPClient.h>
+
+  const char* WIFI_SSID = "YOUR_WIFI_NAME";
+  const char* WIFI_PASS = "YOUR_WIFI_PASSWORD";
+  const char* API_URL = "http://192.168.1.100:3000/api/measurements";
+
+  void setup() {
+    Serial.begin(115200);
+    WiFi.begin(WIFI_SSID, WIFI_PASS);
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(500);
+    }
+  }
+
+  void loop() {
+    if (WiFi.status() == WL_CONNECTED) {
+      HTTPClient http;
+      http.begin(API_URL);
+      http.addHeader("Content-Type", "application/json");
+
+      String payload = R"({
+        \"voltage\": 230.5,
+        \"current\": 10.2,
+        \"activePower\": 2.35,
+        \"reactivePower\": 0.85,
+        \"energy\": 120.4,
+        \"frequency\": 50.0,
+        \"powerFactor\": 0.95,
+        \"timestamp\": \"2026-02-04T12:00:00Z\"
+      })";
+
+      http.POST(payload);
+      http.end();
+    }
+    delay(3000);
+  }
+
+Steps:
+1) Replace WiFi credentials
+2) Replace API_URL with your Node backend IP (same network)
+3) Upload to ESP32
+
+When ESP32 starts posting data, the dashboard updates in real time.
