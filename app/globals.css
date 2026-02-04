@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Background colors */
+  --background: #0a0a0a;
+  --background-secondary: #111111;
+  --background-tertiary: #171717;
+  --background-elevated: #1a1a1a;
+
+  /* Border colors */
+  --border: #262626;
+  --border-subtle: #1f1f1f;
+
+  /* Text colors */
+  --foreground: #fafafa;
+  --foreground-secondary: #a1a1a1;
+  --foreground-muted: #737373;
+
+  /* Accent colors */
+  --accent-blue: #3b82f6;
+  --accent-green: #22c55e;
+  --accent-yellow: #eab308;
+  --accent-cyan: #06b6d4;
+  --accent-purple: #a855f7;
+  --accent-orange: #f97316;
+  --accent-pink: #ec4899;
+
+  /* Status colors */
+  --status-online: #22c55e;
+  --status-warning: #eab308;
+  --status-error: #ef4444;
+
+  --radius: 0.5rem;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-inter), -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--background);
+  color: var(--foreground);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer base {
+  * {
+    @apply border-[var(--border)];
+  }
+}
