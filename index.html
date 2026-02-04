@@ -3,109 +3,217 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Centrale de Mesure Dashboard</title>
+  <title>Centrale de Mesure - Industrial Monitoring Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;600&family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!--
-    UI STRUCTURE
-    - Top status bar with plant info and clock
-    - Main grid: measurement cards + chart panel
-  -->
   <div class="app">
-    <header class="topbar">
-      <div class="brand">
-        <div class="brand-mark"></div>
-        <div>
-          <div class="title">Centrale de Mesure</div>
-          <div class="subtitle">Industrial Monitoring Console</div>
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="32" height="32" rx="8" fill="currentColor" class="logo-bg"/>
+            <path d="M8 16H24M16 8V24M10 10L22 22M22 10L10 22" stroke="#0a0a0a" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <div class="logo-text">
+            <span class="logo-title">Centrale de Mesure</span>
+            <span class="logo-subtitle">Industrial Monitoring</span>
+          </div>
         </div>
       </div>
-      <div class="status">
-        <div class="status-item">
-          <span class="label">Status</span>
-          <span class="value ok">Online</span>
-        </div>
-        <div class="status-item">
-          <span class="label">Last Update</span>
-          <span class="value" id="lastUpdate">--:--:--</span>
+      <div class="header-right">
+        <div class="status-indicators">
+          <div class="status-item">
+            <span class="status-dot online"></span>
+            <span class="status-label">System Online</span>
+          </div>
+          <div class="divider"></div>
+          <div class="status-item">
+            <span class="status-label muted">Last Update</span>
+            <span class="status-value" id="lastUpdate">--:--:--</span>
+          </div>
         </div>
       </div>
     </header>
 
-    <main class="grid">
-      <section class="cards">
-        <!-- Measurement Cards: values updated by script.js -->
-        <div class="card" data-key="voltage">
-          <div class="card-head">
-            <span class="card-title">Voltage</span>
-            <span class="card-unit">V</span>
-          </div>
-          <div class="card-value" id="voltageValue">--</div>
+    <!-- Main Content -->
+    <main class="main">
+      <!-- Metrics Grid -->
+      <section class="metrics-section">
+        <div class="section-header">
+          <h2 class="section-title">Live Measurements</h2>
+          <span class="section-badge">Real-time</span>
         </div>
-
-        <div class="card" data-key="current">
-          <div class="card-head">
-            <span class="card-title">Current</span>
-            <span class="card-unit">A</span>
+        
+        <div class="metrics-grid">
+          <!-- Voltage Card -->
+          <div class="metric-card" data-key="voltage">
+            <div class="metric-header">
+              <div class="metric-icon voltage">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                </svg>
+              </div>
+              <span class="metric-label">Voltage</span>
+            </div>
+            <div class="metric-body">
+              <span class="metric-value" id="voltageValue">--</span>
+              <span class="metric-unit">V</span>
+            </div>
+            <div class="metric-footer">
+              <span class="metric-range">Nominal: 220-240V</span>
+            </div>
           </div>
-          <div class="card-value" id="currentValue">--</div>
-        </div>
 
-        <div class="card" data-key="activePower">
-          <div class="card-head">
-            <span class="card-title">Active Power</span>
-            <span class="card-unit">kW</span>
+          <!-- Current Card -->
+          <div class="metric-card" data-key="current">
+            <div class="metric-header">
+              <div class="metric-icon current">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 2v20M2 12h20"/>
+                </svg>
+              </div>
+              <span class="metric-label">Current</span>
+            </div>
+            <div class="metric-body">
+              <span class="metric-value" id="currentValue">--</span>
+              <span class="metric-unit">A</span>
+            </div>
+            <div class="metric-footer">
+              <span class="metric-range">Max: 16A</span>
+            </div>
           </div>
-          <div class="card-value" id="activePowerValue">--</div>
-        </div>
 
-        <div class="card" data-key="reactivePower">
-          <div class="card-head">
-            <span class="card-title">Reactive Power</span>
-            <span class="card-unit">kVAR</span>
+          <!-- Active Power Card -->
+          <div class="metric-card" data-key="activePower">
+            <div class="metric-header">
+              <div class="metric-icon power">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="10"/>
+                  <path d="M12 6v6l4 2"/>
+                </svg>
+              </div>
+              <span class="metric-label">Active Power</span>
+            </div>
+            <div class="metric-body">
+              <span class="metric-value" id="activePowerValue">--</span>
+              <span class="metric-unit">kW</span>
+            </div>
+            <div class="metric-footer">
+              <span class="metric-range">P = V x I x cos(phi)</span>
+            </div>
           </div>
-          <div class="card-value" id="reactivePowerValue">--</div>
-        </div>
 
-        <div class="card" data-key="energy">
-          <div class="card-head">
-            <span class="card-title">Energy</span>
-            <span class="card-unit">kWh</span>
+          <!-- Reactive Power Card -->
+          <div class="metric-card" data-key="reactivePower">
+            <div class="metric-header">
+              <div class="metric-icon reactive">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                </svg>
+              </div>
+              <span class="metric-label">Reactive Power</span>
+            </div>
+            <div class="metric-body">
+              <span class="metric-value" id="reactivePowerValue">--</span>
+              <span class="metric-unit">kVAR</span>
+            </div>
+            <div class="metric-footer">
+              <span class="metric-range">Q = V x I x sin(phi)</span>
+            </div>
           </div>
-          <div class="card-value" id="energyValue">--</div>
-        </div>
 
-        <div class="card" data-key="frequency">
-          <div class="card-head">
-            <span class="card-title">Frequency</span>
-            <span class="card-unit">Hz</span>
+          <!-- Energy Card -->
+          <div class="metric-card" data-key="energy">
+            <div class="metric-header">
+              <div class="metric-icon energy">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                </svg>
+              </div>
+              <span class="metric-label">Energy</span>
+            </div>
+            <div class="metric-body">
+              <span class="metric-value" id="energyValue">--</span>
+              <span class="metric-unit">kWh</span>
+            </div>
+            <div class="metric-footer">
+              <span class="metric-range">Total Consumption</span>
+            </div>
           </div>
-          <div class="card-value" id="frequencyValue">--</div>
-        </div>
 
-        <div class="card" data-key="powerFactor">
-          <div class="card-head">
-            <span class="card-title">Power Factor</span>
-            <span class="card-unit">PF</span>
+          <!-- Frequency Card -->
+          <div class="metric-card" data-key="frequency">
+            <div class="metric-header">
+              <div class="metric-icon frequency">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M2 12h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2H2V8a2 2 0 0 1 2-2h2"/>
+                  <path d="M22 12h-2a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2V8a2 2 0 0 0-2-2h-2"/>
+                  <path d="M8 12h8"/>
+                </svg>
+              </div>
+              <span class="metric-label">Frequency</span>
+            </div>
+            <div class="metric-body">
+              <span class="metric-value" id="frequencyValue">--</span>
+              <span class="metric-unit">Hz</span>
+            </div>
+            <div class="metric-footer">
+              <span class="metric-range">Nominal: 50Hz</span>
+            </div>
           </div>
-          <div class="card-value" id="powerFactorValue">--</div>
+
+          <!-- Power Factor Card -->
+          <div class="metric-card wide" data-key="powerFactor">
+            <div class="metric-header">
+              <div class="metric-icon pf">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 20v-6M6 20V10M18 20V4"/>
+                </svg>
+              </div>
+              <span class="metric-label">Power Factor</span>
+            </div>
+            <div class="metric-body">
+              <span class="metric-value" id="powerFactorValue">--</span>
+              <span class="metric-unit">PF</span>
+            </div>
+            <div class="metric-footer">
+              <div class="pf-bar">
+                <div class="pf-fill" id="pfFill"></div>
+              </div>
+              <span class="metric-range">Target: 0.95 - 1.00</span>
+            </div>
+          </div>
         </div>
       </section>
 
-      <section class="panel">
-        <div class="panel-head">
-          <h2>Active Power Trend</h2>
-          <span class="panel-sub">kW vs Time</span>
+      <!-- Chart Section -->
+      <section class="chart-section">
+        <div class="section-header">
+          <h2 class="section-title">Active Power Trend</h2>
+          <div class="chart-legend">
+            <span class="legend-item">
+              <span class="legend-dot"></span>
+              kW vs Time
+            </span>
+          </div>
         </div>
-        <div class="chart-wrap">
+        <div class="chart-container">
           <canvas id="powerChart"></canvas>
         </div>
       </section>
     </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span class="footer-text">Centrale de Mesure - Industrial Monitoring System</span>
+      <span class="footer-text muted">Simulation Mode</span>
+    </footer>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
