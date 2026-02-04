@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 80" width="260" height="80" role="img" aria-label="Centrale de Mesure">
+  <defs>
+    <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#3cffb0" />
+      <stop offset="100%" stop-color="#5ad1ff" />
+    </linearGradient>
+  </defs>
+  <circle cx="36" cy="40" r="28" fill="url(#g1)" />
+  <circle cx="36" cy="40" r="20" fill="#0b1016" />
+  <path d="M32 24l-6 18h10l-6 14 16-22h-10l6-10z" fill="#5ad1ff" />
+  <text x="78" y="36" font-family="Oswald, sans-serif" font-size="22" fill="#e6eef7" letter-spacing="0.6">Centrale</text>
+  <text x="78" y="60" font-family="Space Grotesk, sans-serif" font-size="14" fill="#9fb0c5">de Mesure</text>
+</svg>
